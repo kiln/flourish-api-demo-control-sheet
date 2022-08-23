@@ -1,0 +1,4 @@
+base_chart,container,don't include,bindings,settings,data
+10914971,chart-01,bar,,,"data: local-data/data.csv, blurb: local-data/blurb.csv"
+10914971,chart-02,line,,,"data: local-data/data.csv, blurb: local-data/blurb.csv, other: local-data/other.csv"
+10914966,chart-03,bubble,,,"data: local-data/data.csv, blurb: local-data/blurb.csv"
