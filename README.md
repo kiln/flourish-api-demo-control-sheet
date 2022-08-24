@@ -15,4 +15,8 @@ Each control sheet requires the following column names and allows the respective
   ```
 
 - **settings**:
-- **data**: data url for data. Taken from base chart if empty. If not empty, needs to be in the format: `<flourish dataset name>: <data url>`. Multiple datasets can be separated with a comma. For example: `data: data.csv, regions: my_regions.csv, lines: Lines.csv`. All datasets must be in csv format. Field is either empty or covers all required datasets.
+- **data**: data url for data. Taken from base chart if empty. If not empty, needs to be in JSON format listing each dataset and the data URL to pull from. Example:
+
+  ```
+  { "data": "local-data/data.csv", "regions": "https://my.data-url.csv" }
+  ```

@@ -20,18 +20,24 @@ function convertToArrayOfArrays(array) {
   return arrayOfArrays;
 }
 
-async function parseFetchDataURL(string) {
-  const trimmed = string.replace(/\s+/g, "");
-  const split = trimmed.split(",");
-  const datasets = {};
+function convertData(data) {
+  for (const dataset of Object.keys(data)) {
+    // Very defensive. Should never happen as all 
+    // d3.csv datasets get read as arrays of objects.
+    if (Array.isArray(data[dataset][0])) break;
+    data[dataset] = convertToArrayOfArrays(data[dataset]);
+  }
+  return data;
+}
 
-  for (let i = 0; i < split.length; i++) {
-    const dataset = split[i];
-    const sectioned = dataset.split(":");
-    datasets[sectioned[0]] = await d3.csv(sectioned[1]);
+async function fetchData(string) {
+  const data = parseJSON(string);
+
+  for (const dataset of Object.keys(data)) {
+    data[dataset] = await d3.csv(data[dataset]);
   }
 
-  return datasets;
+  return data;
 }
 
 async function setChartData(final_data, row, row_index, base_chart_json) {
@@ -51,14 +57,8 @@ async function setChartData(final_data, row, row_index, base_chart_json) {
   }
 
   // Otherwise, get the datasets (yet make sure they're API ready array of arrays).
-  const datasets = await parseFetchDataURL(row.data);
-
-  for (const dataset of Object.keys(datasets)) {
-    // Very defensive. Should never happen as all d3.csv datasets get read as arrays of objects.
-    if (Array.isArray(datasets[dataset][0])) break;
-    datasets[dataset] = convertToArrayOfArrays(datasets[dataset]);
-  }
-
+  const datasets_raw = await fetchData(row.data);
+  const datasets = convertData(datasets_raw);
   final_data[row_index].data = datasets;
 }
 
@@ -154,7 +154,7 @@ function setChartBindings(final_data, row, row_index, base_chart_json) {
   );
 }
 
-// Run.
+// Get options.
 function initFinalData(control_data) {
   return control_data.map((d) => ({
     base_chart: d.base_chart,
@@ -179,7 +179,7 @@ async function setChartOptions(control_data, base_chart_map) {
   return final_data;
 }
 
-// Entry.
+// Main.
 async function sendVisJsonRequest(vis_id) {
   const endpoint = `https://public.flourish.studio/visualisation/${vis_id}/visualisation.json`;
   const result = await d3.json(endpoint);
