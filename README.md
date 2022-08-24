@@ -8,6 +8,11 @@ Each control sheet requires the following column names and allows the respective
 
 - **base_chart**: flourish chart ID
 - **container**: css ID for chart
-- **bindings**:
+- **bindings**: bindings to map data columns to visual marks. Taken from base chart if empty. If not empty, needs to be a JSON object holding the bindings for each dataset of the visualisation.
+
+  ```
+  { "dataset1": {"value": ["Column 1, "Column 2"], "label": "Column 3"}, "dataset2": { "x": "Column 1", "y":"Column 2" } }
+  ```
+
 - **settings**:
 - **data**: data url for data. Taken from base chart if empty. If not empty, needs to be in the format: `<flourish dataset name>: <data url>`. Multiple datasets can be separated with a comma. For example: `data: data.csv, regions: my_regions.csv, lines: Lines.csv`. All datasets must be in csv format. Field is either empty or covers all required datasets.

@@ -74,19 +74,19 @@ function convertToIndex(binding_value, data_columns) {
   return data_columns.indexOf(binding_value);
 }
 
-function trim(string) {
-  return string.trim();
+function parseJSON(string) {
+  const unescaped_string = _.unescape(string);
+  if (string[0] === "{") return JSON.parse(unescaped_string);
+  return JSON.parse(`{${unescaped_string}}`);
 }
 
 function parseBindings(string, columns) {
-  let bindings_final = {};
+  let bindings = {};
+  const parsed = parseJSON(string);
 
-  const datasets = string.split("::").map(trim);
-  for (let i = 0; i < datasets.length; i++) {
-    const dataset = datasets[i];
-    const dataset_split = dataset.split(":").map(trim);
-    const dataset_name = dataset_split[0];
-    if (Object.keys(columns).indexOf(dataset_name) < 0) {
+  // Loop through datasets
+  for (const dataset_name of Object.keys(parsed)) {
+    if (!Object.keys(columns).includes(dataset_name)) {
       console.warn(
         `Ignoring all bindings from the "${dataset_name}" dataset. Allowed datasets are "${Object.keys(
           columns
@@ -94,35 +94,42 @@ function parseBindings(string, columns) {
       );
       break;
     }
-    bindings_final[dataset_name] = {};
 
-    const bindings = dataset_split[1].split(";").map(trim);
-    for (let i = 0; i < bindings.length; i++) {
-      const binding = bindings[i];
-      const binding_split = binding.split("=").map(trim);
-      const binding_name = binding_split[0];
-      const binding_value = binding_split[1];
-      const value_type = binding_value[0] == "[" ? "array" : "literal";
-      let indexed_binding;
-      if (value_type === "array") {
-        const binding_values = binding_value
-          .replace(/[\[\]]/g, "")
-          .split(",")
-          .map(trim);
-        indexed_binding = binding_values.map((value) =>
+    bindings[dataset_name] = parsed[dataset_name];
+
+    // Loop through bindings.
+    for (const binding of Object.keys(bindings[dataset_name])) {
+      if (!parsed[dataset_name].hasOwnProperty(binding)) {
+        throw Error(
+          `Binding to the column name "${binding}" not possible. Available column names to bind to are "${Object.keys(
+            parsed[dataset_name]
+          ).join('" or "')}"`
+        );
+      }
+
+      // Convert bindings value name to index.
+      let bindings_value;
+      if (Array.isArray(bindings[dataset_name][binding])) {
+        bindings_value = bindings[dataset_name][binding].map((value) =>
           convertToIndex(value, columns[dataset_name])
         );
       } else {
-        indexed_binding = convertToIndex(binding_value, columns[dataset_name]);
+        bindings_value = convertToIndex(
+          bindings[dataset_name][binding],
+          columns[dataset_name]
+        );
       }
-      const binding_object = { [binding_name]: indexed_binding };
-      bindings_final[dataset_name] = {
-        ...bindings_final[dataset_name],
-        ...binding_object,
+
+      // Compose final bindings object.
+      const bindings_object = { [binding]: bindings_value };
+      bindings[dataset_name] = {
+        ...bindings[dataset_name],
+        ...bindings_object,
       };
     }
   }
-  return bindings_final;
+
+  return bindings;
 }
 
 function getDataColumns(data) {
