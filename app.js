@@ -1,7 +1,28 @@
+// Maybe required.
+function convertToArrayOfObjects(array) {
+	const cols = array.shift();
+
+	const result = array.map(el => {
+		const obj = {};
+		cols.forEach((col, i) => (obj[col] = el[i]));
+		return obj;
+	});
+
+	result.columns = cols;
+	return result;
+}
+
+// Get data.
+function convertToArrayOfArrays(array) {
+	const keys = Object.keys(array[0]);
+	const arrayOfArrays = array.map(Object.values);
+	arrayOfArrays.unshift(keys);
+	return arrayOfArrays;
+}
+
 async function sendVisJsonRequest(vis_id) {
 	const endpoint = `https://public.flourish.studio/visualisation/${vis_id}/visualisation.json`;
 	const result = await d3.json(endpoint);
-  // TODO: what do we do with multiple datasets?
 	return result;
 }
 
@@ -56,9 +77,81 @@ async function setChartData(final_data, row, row_index, base_chart_json) {
     return
   }
 
+  // Otherwise, get the datasets (yet make sure they're API ready array of arrays).
   const datasets = await parseFetchDataURL(row.data);
-  final_data[row_index].data = datasets;
 
+  for (const dataset of Object.keys(datasets)) {
+    // Very defensive. Should never happen as all d3.csv datasets get read as arrays of objects.
+    if (Array.isArray(datasets[dataset][0])) break; 
+    datasets[dataset] = convertToArrayOfArrays(datasets[dataset])
+  }
+
+  final_data[row_index].data = datasets;
+}
+
+// Get bindings.
+function convertToIndex(binding_value, data_columns) {
+  const binding_index = data_columns.indexOf(binding_value)
+  if (binding_index < 0) throw Error(`The binding value "${binding_value}" is not a data column name. Possible values are: "${data_columns.join(", ")}"`)
+  return data_columns.indexOf(binding_value)
+}
+
+function trim(string) {
+  return string.trim()
+}
+
+function parseBindings(string, columns) {
+  let bindings_final = {};
+
+  const datasets = string.split("::").map(trim);
+  for (let i = 0; i < datasets.length; i++) {
+    const dataset = datasets[i];
+    const dataset_split = dataset.split(":").map(trim)
+    const dataset_name = dataset_split[0];
+    if (Object.keys(columns).indexOf(dataset_name) < 0) {
+      console.warn(`Ignoring all bindings from the "${dataset_name}" dataset. Allowed datasets are "${Object.keys(columns).join("\" or \"")}"`);
+      break;
+    }
+    bindings_final[dataset_name] = {};
+    
+    const bindings = dataset_split[1].split(";").map(trim);
+    for (let i = 0; i < bindings.length; i++) {
+      const binding = bindings[i];
+      const binding_split = binding.split("=").map(trim);
+      const binding_name = binding_split[0];
+      const binding_value = binding_split[1];
+      const value_type = binding_value[0] == "[" ? "array" : "literal";
+      let indexed_binding;
+      if (value_type === "array") {
+        const binding_values = binding_value.replace(/[\[\]]/g, "").split(",").map(trim);
+        indexed_binding = binding_values.map(value => convertToIndex(value, columns[dataset_name]));
+      } else {
+        indexed_binding = convertToIndex(binding_value, columns[dataset_name])
+      }      
+      const binding_object = { [binding_name]: indexed_binding }
+      bindings_final[dataset_name] = {...bindings_final[dataset_name],...binding_object}
+    }
+  }
+  return bindings_final;
+}
+
+function getDataColumns(data) {
+  // Assuming the first row of each data are the data column names.
+  const datasets = _.cloneDeep(data);
+  for (const dataset of Object.keys(datasets)) {
+    datasets[dataset] = datasets[dataset][0]
+  }
+  return datasets;
+}
+
+function setChartBindings(final_data, row, row_index, base_chart_json) {
+  if (!row.bindings) {
+    final_data[row_index].bindings = base_chart_json.bindings;
+    return;
+  }
+  
+  const data_column_names = getDataColumns(final_data[row_index].data);
+  final_data[row_index].bindings = parseBindings(row.bindings, data_column_names);
 }
 
 async function setChartOptions(control_data, base_chart_map) {
@@ -67,12 +160,13 @@ async function setChartOptions(control_data, base_chart_map) {
   // Loop through control data and assemble data-sources, bindings and settings.
   for (let i = 0; i < control_data.length; i++) {
     const row = control_data[i];
+    const base_chart_data = base_chart_map.get(row.base_chart);
 
-    await setChartData(final_data, row, i, base_chart_map.get(row.base_chart))
+    await setChartData(final_data, row, i, base_chart_data);
+    setChartBindings(final_data, row, i, base_chart_data);
   }
 
   return final_data;
-
 }
 
 async function main(control_data) {
