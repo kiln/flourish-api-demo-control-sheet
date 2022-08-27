@@ -21,6 +21,16 @@ function parseJSON(string) {
   return JSON.parse(`{${unescaped_string}}`);
 }
 
+// Set base data.
+function setBaseData(row, base_chart_json) {
+  return  {
+    template: base_chart_json.template,
+    version: base_chart_json.version,
+    container: row.container,
+    api_key: API_KEY,
+  }
+}
+
 // Get data.
 function convertToArrayOfArrays(array) {
   const keys = Object.keys(array[0]);
@@ -50,25 +60,18 @@ async function fetchData(string) {
 }
 
 async function setChartData(final_data, row, row_index, base_chart_json) {
-  if (!row.data) {
-    final_data[row_index].data = base_chart_json.data;
-    return;
-  }
+  if (!row.data) return base_chart_json.data;
 
   // Check for previously fetched datasets and use them instead of re-fetching.
   const data_matches = final_data.filter(
     (d, i) => i < row_index && d.data_url === row.data
   );
 
-  if (data_matches.length > 0) {
-    final_data[row_index].data = data_matches[0].data;
-    return;
-  }
+  if (data_matches.length > 0) return data_matches[0].data;
 
   // Otherwise, get the datasets (yet make sure they're API ready array of arrays).
   const datasets_raw = await fetchData(row.data);
-  const datasets = convertData(datasets_raw);
-  final_data[row_index].data = datasets;
+  return convertData(datasets_raw);
 }
 
 // Get bindings.
@@ -145,39 +148,20 @@ function getDataColumns(data) {
 }
 
 function setChartBindings(final_data, row, row_index, base_chart_json) {
-  if (!row.bindings) {
-    final_data[row_index].bindings = base_chart_json.bindings;
-    return;
-  }
+  if (!row.bindings) return base_chart_json.bindings;
 
   const data_column_names = getDataColumns(final_data[row_index].data);
-  final_data[row_index].bindings = parseBindings(
-    row.bindings,
-    data_column_names
-  );
+  return parseBindings(row.bindings, data_column_names);
 }
 
 // Set settings.
-function setChartSettings(final_data, row, row_index, base_chart_json) {
-  if (!row.settings) {
-    final_data[row_index].settings = base_chart_json.state;
-    return;
-  }
+function setChartSettings(row, base_chart_json) {
+  if (!row.settings) return base_chart_json.state;
 
-  final_data[row_index].settings = {
+  return {
     ...base_chart_json.state,
     ...parseJSON(row.settings),
   };
-}
-
-// Set base data.
-function setBaseData(final_data, row, row_index, base_chart_json) {
-  return final_data[row_index].base = {
-    template: base_chart_json.template,
-    version: base_chart_json.version,
-    container: row.container,
-    api_key: API_KEY,
-  }
 }
 
 // Get options.
@@ -198,10 +182,10 @@ async function setChartOptions(control_data, base_chart_map) {
     const row = control_data[i];
     const base_chart_data = base_chart_map.get(row.base_chart);
 
-    setBaseData(final_data, row, i, base_chart_data);
-    await setChartData(final_data, row, i, base_chart_data);
-    setChartBindings(final_data, row, i, base_chart_data);
-    setChartSettings(final_data, row, i, base_chart_data);
+    final_data[i].base = setBaseData(row, base_chart_data);
+    final_data[i].data = await setChartData(final_data, row, i, base_chart_data);
+    final_data[i].bindings = setChartBindings(final_data, row, i, base_chart_data);
+    final_data[i].settings = setChartSettings(row, base_chart_data);
   }
 
   return final_data;
