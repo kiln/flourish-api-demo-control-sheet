@@ -12,6 +12,13 @@ function convertToArrayOfObjects(array) {
   return result;
 }
 
+// Helpers.
+function parseJSON(string) {
+  const unescaped_string = _.unescape(string);
+  if (string[0] === "{") return JSON.parse(unescaped_string);
+  return JSON.parse(`{${unescaped_string}}`);
+}
+
 // Get data.
 function convertToArrayOfArrays(array) {
   const keys = Object.keys(array[0]);
@@ -22,7 +29,7 @@ function convertToArrayOfArrays(array) {
 
 function convertData(data) {
   for (const dataset of Object.keys(data)) {
-    // Very defensive. Should never happen as all 
+    // Very defensive. Should never happen as all
     // d3.csv datasets get read as arrays of objects.
     if (Array.isArray(data[dataset][0])) break;
     data[dataset] = convertToArrayOfArrays(data[dataset]);
@@ -72,12 +79,6 @@ function convertToIndex(binding_value, data_columns) {
       )}"`
     );
   return data_columns.indexOf(binding_value);
-}
-
-function parseJSON(string) {
-  const unescaped_string = _.unescape(string);
-  if (string[0] === "{") return JSON.parse(unescaped_string);
-  return JSON.parse(`{${unescaped_string}}`);
 }
 
 function parseBindings(string, columns) {
@@ -154,6 +155,19 @@ function setChartBindings(final_data, row, row_index, base_chart_json) {
   );
 }
 
+// Set settings.
+function setChartSettings(final_data, row, row_index, base_chart_json) {
+  if (!row.settings) {
+    final_data[row_index].settings = base_chart_json.state;
+    return;
+  }
+
+  final_data[row_index].settings = {
+    ...base_chart_json.state,
+    ...parseJSON(row.settings),
+  };
+}
+
 // Get options.
 function initFinalData(control_data) {
   return control_data.map((d) => ({
@@ -174,6 +188,7 @@ async function setChartOptions(control_data, base_chart_map) {
 
     await setChartData(final_data, row, i, base_chart_data);
     setChartBindings(final_data, row, i, base_chart_data);
+    setChartSettings(final_data, row, i, base_chart_data);
   }
 
   return final_data;
