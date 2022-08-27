@@ -12,6 +12,8 @@ function convertToArrayOfObjects(array) {
   return result;
 }
 
+const API_KEY = 'CwU3_QkITsW9u9ChjJRp0sYHNFVDf7RLXamwrYePJx9HZTka_4gHqZfWDRVRNizG';
+
 // Helpers.
 function parseJSON(string) {
   const unescaped_string = _.unescape(string);
@@ -168,6 +170,16 @@ function setChartSettings(final_data, row, row_index, base_chart_json) {
   };
 }
 
+// Set base data.
+function setBaseData(final_data, row, row_index, base_chart_json) {
+  return final_data[row_index].base = {
+    template: base_chart_json.template,
+    version: base_chart_json.version,
+    container: row.container,
+    api_key: API_KEY,
+  }
+}
+
 // Get options.
 function initFinalData(control_data) {
   return control_data.map((d) => ({
@@ -186,12 +198,37 @@ async function setChartOptions(control_data, base_chart_map) {
     const row = control_data[i];
     const base_chart_data = base_chart_map.get(row.base_chart);
 
+    setBaseData(final_data, row, i, base_chart_data);
     await setChartData(final_data, row, i, base_chart_data);
     setChartBindings(final_data, row, i, base_chart_data);
     setChartSettings(final_data, row, i, base_chart_data);
   }
 
   return final_data;
+}
+
+// Build charts.
+function buildOptions(data) {
+  return {
+    template: "@flourish/line-bar-pie",
+    version: "24.1.7",
+    api_key: "YOUR API KEY",
+    container: "YOUR CONTAINER SELECTOR",
+    private: false,
+    state: {},
+    bindings: {},
+    data: {},
+  };
+}
+
+
+function buildCharts(charts) {
+  for (let i = 0; i < charts.length; i++) {
+    const chart_data = charts[i];
+
+    console.log(chart_data)
+    const options = buildOptions(chart_data);
+  }
 }
 
 // Main.
@@ -218,7 +255,9 @@ async function getBaseChartMap(control_data) {
 async function main(control_data) {
   const base_chart_map = await getBaseChartMap(control_data);
   const chart_options = await setChartOptions(control_data, base_chart_map);
-  console.log("final options", chart_options);
+  buildCharts(chart_options);
+
+  // console.log("final options", chart_options);
 }
 
 d3.csv("control-sheet.csv").then(main);
