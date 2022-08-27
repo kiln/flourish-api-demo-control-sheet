@@ -192,26 +192,25 @@ async function setChartOptions(control_data, base_chart_map) {
 }
 
 // Build charts.
-function buildOptions(data) {
+function setAPIOptions(data) {
   return {
-    template: "@flourish/line-bar-pie",
-    version: "24.1.7",
-    api_key: "YOUR API KEY",
-    container: "YOUR CONTAINER SELECTOR",
+    template: data.base.template,
+    version: data.base.version,
+    api_key: data.base.api_key,
+    container: data.base.container,
+    state: data.settings,
+    bindings: data.bindings,
+    data: data.data,
     private: false,
-    state: {},
-    bindings: {},
-    data: {},
   };
 }
 
-
-function buildCharts(charts) {
+function buildAPICharts(charts) {
   for (let i = 0; i < charts.length; i++) {
     const chart_data = charts[i];
-
-    console.log(chart_data)
-    const options = buildOptions(chart_data);
+    const options = setAPIOptions(chart_data);
+    console.log(options);
+    // CONTINUE to build charts
   }
 }
 
@@ -239,7 +238,7 @@ async function getBaseChartMap(control_data) {
 async function main(control_data) {
   const base_chart_map = await getBaseChartMap(control_data);
   const chart_options = await setChartOptions(control_data, base_chart_map);
-  buildCharts(chart_options);
+  buildAPICharts(chart_options);
 
   // console.log("final options", chart_options);
 }
