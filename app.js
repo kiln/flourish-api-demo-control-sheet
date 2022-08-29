@@ -210,7 +210,8 @@ function buildAPICharts(charts) {
     const chart_data = charts[i];
     const options = setAPIOptions(chart_data);
     console.log(options);
-    // CONTINUE to build charts
+    const visual = new Flourish.Live(options)
+    // CONTINUE test control-sheet entries
   }
 }
 
