@@ -17,6 +17,7 @@ const API_KEY = 'CwU3_QkITsW9u9ChjJRp0sYHNFVDf7RLXamwrYePJx9HZTka_4gHqZfWDRVRNiz
 // Helpers.
 function parseJSON(string) {
   const unescaped_string = _.unescape(string);
+  // Allows control sheet authors to add JSON objects with or w/o top level curly braces.
   if (string[0] === "{") return JSON.parse(unescaped_string);
   return JSON.parse(`{${unescaped_string}}`);
 }
@@ -43,7 +44,7 @@ function convertData(data) {
   for (const dataset of Object.keys(data)) {
     // Very defensive. Should never happen as all
     // d3.csv datasets get read as arrays of objects.
-    if (Array.isArray(data[dataset][0])) break;
+    if (Array.isArray(data[dataset][0])) continue;
     data[dataset] = convertToArrayOfArrays(data[dataset]);
   }
   return data;
@@ -86,51 +87,38 @@ function convertToIndex(binding_value, data_columns) {
   return data_columns.indexOf(binding_value);
 }
 
-function parseBindings(string, columns) {
-  let bindings = {};
-  const parsed = parseJSON(string);
+function parseBindings(bindings_given_string, bindings_base, columns) {
+  // This runs through the base chart's bindings spreading in user given bindings.
+  let bindings = _.cloneDeep(bindings_base);
+  const bindings_given = parseJSON(bindings_given_string);
 
   // Loop through datasets
-  for (const dataset_name of Object.keys(parsed)) {
-    if (!Object.keys(columns).includes(dataset_name)) {
-      console.warn(
-        `Ignoring all bindings from the "${dataset_name}" dataset. Allowed datasets are "${Object.keys(
-          columns
-        ).join('" or "')}"`
-      );
-      break;
+  for (const dataset_name of Object.keys(bindings_given)) {
+    // Check if dataset_name is in base bindings.
+    if (!Object.keys(bindings).includes(dataset_name)) {
+      console.warn(`Ignoring dataset "${dataset_name}" not found in base bindings.`);
+      continue;
     }
-
-    bindings[dataset_name] = parsed[dataset_name];
-
+        
     // Loop through bindings.
-    for (const binding of Object.keys(bindings[dataset_name])) {
-      if (!parsed[dataset_name].hasOwnProperty(binding)) {
-        throw Error(
-          `Binding to the column name "${binding}" not possible. Available column names to bind to are "${Object.keys(
-            parsed[dataset_name]
-          ).join('" or "')}"`
-        );
+    for (const binding_name of Object.keys(bindings_given[dataset_name])) {
+      // Check if given binding name is in base bindings object?
+      if (!bindings[dataset_name].hasOwnProperty(binding_name)) {
+        console.warn(`Ignoring binding "${binding_name}" not found in base bindings.`);
+        continue;
       }
+      
+      // Convert the binding's value name to a column index.
+      let binding_value = bindings_given[dataset_name][binding_name];
+      binding_value = Array.isArray(binding_value)
+        ? binding_value.map((value) => convertToIndex(value, columns[dataset_name]))
+        : binding_value = convertToIndex(binding_value, columns[dataset_name]);
 
-      // Convert bindings value name to index.
-      let bindings_value;
-      if (Array.isArray(bindings[dataset_name][binding])) {
-        bindings_value = bindings[dataset_name][binding].map((value) =>
-          convertToIndex(value, columns[dataset_name])
-        );
-      } else {
-        bindings_value = convertToIndex(
-          bindings[dataset_name][binding],
-          columns[dataset_name]
-        );
-      }
-
-      // Compose final bindings object.
-      const bindings_object = { [binding]: bindings_value };
+      // Spread binding into final bindings.
+      const binding = { [binding_name]: binding_value };
       bindings[dataset_name] = {
         ...bindings[dataset_name],
-        ...bindings_object,
+        ...binding,
       };
     }
   }
@@ -151,7 +139,7 @@ function setChartBindings(final_data, row, row_index, base_chart_json) {
   if (!row.bindings) return base_chart_json.bindings;
 
   const data_column_names = getDataColumns(final_data[row_index].data);
-  return parseBindings(row.bindings, data_column_names);
+  return parseBindings(row.bindings, base_chart_json.bindings, data_column_names);
 }
 
 // Set settings.
@@ -223,7 +211,7 @@ async function sendVisJsonRequest(vis_id) {
 }
 
 async function getBaseChartMap(control_data) {
-  // get a map for each unique base chart ID.
+  // Get a map for each unique base chart ID.
   const base_chart_map = new Map(
     control_data.map((d) => [d.base_chart, undefined])
   );

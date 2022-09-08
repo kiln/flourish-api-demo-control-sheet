@@ -1,4 +1,3 @@
 base_chart,container,don't include,bindings,settings,data
-10914971,#chart-01,bar,,,
-10914971,#chart-02,line,,,
-11035755,#chart-03,bubble,,,
+10914971,#chart-02,bar too,"""data"": { ""value"": [""Column 1""], ""baboo"": 2}",,
+10166215,#chart-03,,"""choropleth"": {""name"": ""Name""}",,
