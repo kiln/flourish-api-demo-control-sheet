@@ -1,3 +1,4 @@
-base_chart,container,don't include,bindings,settings,data
-10914971,#chart-02,bar too,"""data"": { ""value"": [""Column 1""], ""baboo"": 2}","""layout"": { ""title"": ""Hi"" }",
-10166215,#chart-03,,"""choropleth"": {""name"": ""Name""}",,
+base_chart,container,bindings,settings,data
+11189977,#chart-01,,,
+11189977,#chart-02,"""data"": { ""value"": [""Column 2""] }","""chart_type"": ""line"", ""layout"": { ""subtitle"": ""This is the same base chart as above, but with changed bindings and settings"" }",
+11190065,#chart-03,,,"""choropleth"": ""data/Africa.csv"""

@@ -52,7 +52,6 @@ function convertData(data) {
 
 async function fetchData(string) {
   const data = parseJSON(string);
-
   for (const dataset of Object.keys(data)) {
     data[dataset] = await d3.csv(data[dataset]);
   }
