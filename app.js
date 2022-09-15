@@ -22,7 +22,7 @@ function parseJSON(string) {
   return JSON.parse(`{${unescaped_string}}`);
 }
 
-// Set base data.
+// Set base options.
 function setBaseData(row, base_chart_json) {
   return  {
     template: base_chart_json.template,
@@ -32,7 +32,7 @@ function setBaseData(row, base_chart_json) {
   }
 }
 
-// Get data.
+// Set data.
 function convertToArrayOfArrays(array) {
   const keys = Object.keys(array[0]);
   const arrayOfArrays = array.map(Object.values);
@@ -75,7 +75,7 @@ async function setChartData(final_data, row, row_index, base_chart_json) {
   return convertData(datasets_raw);
 }
 
-// Get bindings.
+// Set bindings.
 function convertToIndex(binding_value, data_columns) {
   const binding_index = data_columns.indexOf(binding_value);
   if (binding_index < 0)
@@ -152,7 +152,7 @@ function setChartSettings(row, base_chart_json) {
   };
 }
 
-// Get options.
+// Set options.
 function initFinalData(control_data) {
   return control_data.map((d) => ({
     base_chart: d.base_chart,
