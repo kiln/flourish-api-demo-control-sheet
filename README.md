@@ -63,3 +63,22 @@ The data URL for the dataset to use. If the field is empty, the data is taken fr
 The property key denotes the Flourish datasheet you would like to read in data for. The data URL to pull the data from goes in the property value. Above example pulls in data for two of the [Projection map template](https://app.flourish.studio/@flourish/projection-map)'s datasheets.
 
 Note, that for this demo all external data needs to be in csv format.
+
+### Notes and tipps
+
+#### JSON Format
+
+Settings, bindings and data input requires JSON objects, but you can remove the outmost curly braces if you wish: so both of the following options are valid:
+
+```
+{ "layout": { "title": "Hello" }}
+"layout": { "title": "Hello" }
+```
+
+#### Available columns
+
+Note, that in order to use a column of your datasheets in the control sheet, it needs to be column bound in the bindings.
+
+If, for example, a base chart datasheet has data columns `Pizzas` and `Salads` but only `Pizzas` is bound to the visual (assigned to a binding in the base chart's datasheet), you can only use column `Pizzas` in your control sheet.
+
+To use other or all columns in a dataset, add them into the **Info for custom popups** binding, which will pull these data columns in and make them available to use elsewhere.
