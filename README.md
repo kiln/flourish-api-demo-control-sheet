@@ -64,7 +64,7 @@ The property key denotes the Flourish datasheet you would like to read in data f
 
 Note, that for this demo all external data needs to be in csv format.
 
-### Notes and tipps
+### Notes and tips
 
 #### JSON Format
 

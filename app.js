@@ -12,7 +12,7 @@ function convertToArrayOfObjects(array) {
   return result;
 }
 
-const API_KEY = 'CwU3_QkITsW9u9ChjJRp0sYHNFVDf7RLXamwrYePJx9HZTka_4gHqZfWDRVRNizG';
+const API_KEY = '<INSERT YOUR API KEY HERE>';
 
 // Helpers.
 function parseJSON(string) {
