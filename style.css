@@ -1,0 +1,31 @@
+body {
+  max-width: 500px;
+  margin: auto;
+  font-family: 'Source Sans Pro', sans-serif;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  border-bottom: 2px solid;
+  color: #51b4f4;
+  padding: 0.2rem 0;
+}
+
+.wrap {
+  margin: 2rem;
+  border: 1px solid rgb(0 0 0 / 7%);
+  box-shadow: 2px 2px 35px rgb(0 0 0 / 7%);
+}
+
+.wrap p {
+  margin: 0;
+  padding: 1rem;
+  background: rgb(175 201 255 / 10%);
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
+}
+
+.wrap .chart {
+  padding: 1rem;
+  
+}

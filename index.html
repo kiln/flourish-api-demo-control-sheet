@@ -7,13 +7,42 @@
     <script src="//unpkg.com/d3"></script>
     <script src="//cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
     <script src="//cdn.flourish.rocks/flourish-live-v4.min.js"></script>
-    <!-- <script src="local-libs/d3-local.js"></script> -->
-    <style type="text/css"></style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="chart-01"></div>
-    <div id="chart-02"></div>
-    <div id="chart-03"></div>
+    <div class="wrap">
+      <p>
+        This is just a straight display of the
+        <a href="https://public.flourish.studio/visualisation/11189977/"
+          >base chart</a
+        >. No changes made.
+      </p>
+
+      <div id="chart-01" class="chart"></div>
+    </div>
+    <div class="wrap">
+      <p>
+        This is the same base chart as above, but with changed bindings and
+        settings.
+      </p>
+      <div id="chart-02" class="chart"></div>
+    </div>
+    <div class="wrap">
+      <p>
+        This is based on a
+        <a href="https://public.flourish.studio/visualisation/11190065/"
+          >projection map base chart</a
+        >
+        (with incomplete data) using locally stored data
+      </p>
+      <div id="chart-03" class="chart"></div>
+    </div>
 
     <script src="app.js"></script>
   </body>

@@ -1,4 +1,4 @@
 base_chart,container,bindings,settings,data
 11189977,#chart-01,,,
-11189977,#chart-02,"""data"": { ""value"": [""Column 2""] }","""chart_type"": ""line"", ""layout"": { ""subtitle"": ""This is the same base chart as above, but with changed bindings and settings"" }",
+11189977,#chart-02,"""data"": { ""value"": [""Column 2""] }","""chart_type"": ""line"", ""layout"": { ""title"": ""Hello"" }",
 11190065,#chart-03,,,"""choropleth"": ""data/Africa.csv"""
