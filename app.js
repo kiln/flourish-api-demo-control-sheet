@@ -1,17 +1,3 @@
-// Maybe required.
-function convertToArrayOfObjects(array) {
-  const cols = array.shift();
-
-  const result = array.map((el) => {
-    const obj = {};
-    cols.forEach((col, i) => (obj[col] = el[i]));
-    return obj;
-  });
-
-  result.columns = cols;
-  return result;
-}
-
 const API_KEY = '<INSERT YOUR API KEY HERE>';
 
 // Helpers.
@@ -196,9 +182,7 @@ function buildAPICharts(charts) {
   for (let i = 0; i < charts.length; i++) {
     const chart_data = charts[i];
     const options = setAPIOptions(chart_data);
-    console.log(options);
     const visual = new Flourish.Live(options)
-    // CONTINUE test control-sheet entries
   }
 }
 
@@ -227,8 +211,6 @@ async function main(control_data) {
   const base_chart_map = await getBaseChartMap(control_data);
   const chart_options = await setChartOptions(control_data, base_chart_map);
   buildAPICharts(chart_options);
-
-  // console.log("final options", chart_options);
 }
 
 d3.csv("control-sheet.csv").then(main);
