@@ -1,3 +1,4 @@
+// API KEY
 const API_KEY = '<INSERT YOUR API KEY HERE>';
 
 // Helpers.
@@ -213,4 +214,4 @@ async function main(control_data) {
   buildAPICharts(chart_options);
 }
 
-d3.csv("control-sheet.csv").then(main);
+d3.csv("data/control-sheet.csv").then(main);

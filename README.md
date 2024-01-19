@@ -1,4 +1,4 @@
-# Flourish control sheet demo
+# Flourish generic control sheet demo
 
 Using a control sheet allows the user to configure Flourish charts via a spreadsheet to quickly build out many charts with the Flourish Live API.
 
@@ -6,7 +6,7 @@ The key benefit of using the Live API is that charts can be build programmatical
 
 It does so by giving the user access to the information the Live API requires like the **template** to use and its **version**, the **data**, the **bindings** as well as the **chart settings**. With a control sheet, the user can compose and control this information in a spreadsheet which gets pulled into the Javascript code building the chart(s) accordingly.
 
-The control sheet is a flexible concept not a solid recipe and there are many ways of implementing a control sheet, depending on the requiremenets. This demo covers a generic implementation focussed on allowing any chart to be build and changed.
+The control sheet is a flexible concept not a solid recipe and there are many ways of implementing a control sheet, depending on the requiremenets. This demo covers a generic implementation focussed on allowing any chart to be build and changed. This comes with a high flexibiility but requires the user to write exact JSON as used by the underlying Live API library. See here for a more targeted example exposing just a few specific settings expecting simple text iput. [TODO: LINK]
 
 ## The code
 
